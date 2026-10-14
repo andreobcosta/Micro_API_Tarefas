@@ -15,6 +15,7 @@ A API rodava sobre `InMemoryTaskRepository`. É preciso persistir de verdade sem
 - **Ordenação:** `created_at` decrescente com desempate por `id` decrescente, nas duas implementações (paginação determinística).
 - **Configuração:** `DATABASE_URL`, `APP_ENV` e `LOG_LEVEL` lidas só de variáveis de ambiente (sem `python-dotenv`, uma dependência a menos). Padrão: `sqlite:///./tasks.db`.
 - **Criação das tabelas:** `create_all` no *lifespan* da aplicação; o engine é criado sem abrir conexão, então importar `app.main` não toca o disco.
+- **Somente SQLite no MVP:** `create_db_engine` recusa qualquer outro banco (ou URL malformada) com erro em português que não repete a URL (pode conter senha). PostgreSQL é Próximo Passo.
 - **Migrações:** fora de escopo (sem Alembic). Mudança de esquema exige recriar o banco; vira Próximo Passo.
 
 ## Consequências

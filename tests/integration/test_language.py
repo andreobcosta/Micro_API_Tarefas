@@ -2,12 +2,18 @@
 
 import json
 import uuid
+from collections.abc import Iterator
+from pathlib import Path
 from typing import Any
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from httpx2 import Response
+
+from app.core.config import Settings
+from app.main import create_app
+from app.repositories.in_memory import InMemoryTaskRepository
 
 ERROR_KEYS = {"codigo", "mensagem", "detalhes"}
 DETAIL_KEYS = {"campo", "mensagem"}
@@ -79,11 +85,27 @@ def _error_responses(client: TestClient) -> list[tuple[str, Response]]:
     ]
 
 
+@pytest.fixture(params=["in_memory", "sql_file"])
+def error_app(request: pytest.FixtureRequest, tmp_path: Path) -> FastAPI:
+    """Aplicação sobre cada caminho de persistência: injetado em memória e SQL."""
+    if request.param == "in_memory":
+        return create_app(repository=InMemoryTaskRepository())
+    return create_app(
+        settings=Settings(database_url=f"sqlite:///{tmp_path / 'idioma.db'}")
+    )
+
+
+@pytest.fixture
+def error_client(error_app: FastAPI) -> Iterator[TestClient]:
+    with TestClient(error_app) as test_client:
+        yield test_client
+
+
 class TestErrorLanguage:
     def test_every_error_follows_the_contract_in_portuguese(
-        self, client: TestClient
+        self, error_client: TestClient
     ) -> None:
-        for scenario, response in _error_responses(client):
+        for scenario, response in _error_responses(error_client):
             body = response.json()
             assert set(body) == ERROR_KEYS, scenario
             assert body["codigo"] in KNOWN_CODES, scenario
@@ -95,12 +117,12 @@ class TestErrorLanguage:
             for message in messages:
                 assert _has_english_marker(message) is None, (scenario, message)
 
-    def test_internal_error_is_in_portuguese(self, app: FastAPI) -> None:
-        @app.get("/falha")
+    def test_internal_error_is_in_portuguese(self, error_app: FastAPI) -> None:
+        @error_app.get("/falha")
         def fail() -> None:
             raise RuntimeError("boom")
 
-        client = TestClient(app, raise_server_exceptions=False)
+        client = TestClient(error_app, raise_server_exceptions=False)
 
         body = client.get("/falha").json()
 

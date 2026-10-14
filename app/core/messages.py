@@ -123,4 +123,7 @@ RESPONSE_HEALTH = "Aplicação operacional."
 CONFIG_INVALID_LOG_LEVEL = (
     "Valor inválido para LOG_LEVEL: {value!r}. Use um de: {allowed}."
 )
+CONFIG_UNSUPPORTED_DATABASE = (
+    "O banco configurado em DATABASE_URL não é suportado; use SQLite (sqlite:///...)."
+)
 NAIVE_DATETIME = "A data deve conter fuso horário (UTC)."
