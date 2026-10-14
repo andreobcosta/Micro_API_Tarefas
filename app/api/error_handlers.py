@@ -46,7 +46,7 @@ def _field_name(location: tuple[Any, ...]) -> str:
         parts = parts[1:]
     if not any(isinstance(part, str) for part in parts):
         return messages.FIELD_BODY
-    return ".".join(messages.FIELD_LABELS.get(str(part), str(part)) for part in parts)
+    return ".".join(str(part) for part in parts)
 
 
 def _message(error: Mapping[str, Any]) -> str:

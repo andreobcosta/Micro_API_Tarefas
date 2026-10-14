@@ -11,6 +11,7 @@ router = APIRouter(tags=[messages.TAG_HEALTH])
 @router.get(
     "/saude",
     response_model=HealthResponse,
+    operation_id=messages.OPERATION_ID_HEALTH,
     summary=messages.SUMMARY_HEALTH,
     description=messages.DESCRIPTION_HEALTH,
     response_description=messages.RESPONSE_HEALTH,

@@ -38,12 +38,12 @@ class TaskReplace(BaseModel):
 class TaskUpdate(BaseModel):
     """Corpo do `PATCH /tarefas/{id}`.
 
-    Os campos ausentes não são alterados (use `model_fields_set` para saber o
-    que foi enviado). `titulo` e `status` não aceitam `null`; `descricao`
-    aceita `null` para limpar a descrição. O `None` padrão não é validado
-    pelo Pydantic, por isso só vale para campos ausentes.
+    Os campos ausentes não são alterados. `titulo` e `status` não aceitam
+    `null`; `descricao` aceita `null` para limpar a descrição.
     """
 
+    # Use `model_fields_set` para saber o que foi enviado. O `None` padrão não é
+    # validado pelo Pydantic, por isso só vale para campos ausentes.
     model_config = ConfigDict(populate_by_name=True)
 
     title: Title = Field(default=None, alias="titulo")  # type: ignore[assignment]
@@ -59,8 +59,9 @@ class TaskUpdate(BaseModel):
 
 
 class TaskResponse(BaseModel):
-    """Tarefa devolvida pela API; serialize com `by_alias=True`."""
+    """Tarefa devolvida pela API."""
 
+    # Serialize com `by_alias=True`.
     model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
     id: uuid.UUID
@@ -72,8 +73,9 @@ class TaskResponse(BaseModel):
 
 
 class TaskListResponse(BaseModel):
-    """Página de tarefas devolvida por `GET /tarefas`; serialize com `by_alias=True`."""
+    """Página de tarefas devolvida por `GET /tarefas`."""
 
+    # Serialize com `by_alias=True`.
     model_config = ConfigDict(populate_by_name=True)
 
     items: list[TaskResponse] = Field(alias="itens")

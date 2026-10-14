@@ -155,7 +155,7 @@ class TestOpenApiLanguage:
             assert _has_english_marker(text) is None, text
 
     def test_patch_is_documented(self, schema: dict[str, Any]) -> None:
-        operation = schema["paths"]["/tarefas/{task_id}"]["patch"]
+        operation = schema["paths"]["/tarefas/{id}"]["patch"]
 
         assert operation["summary"]
         assert operation["responses"]["200"]["description"]
@@ -179,6 +179,6 @@ class TestOpenApiLanguage:
 
     def test_routes_with_id_document_404(self, schema: dict[str, Any]) -> None:
         for method in ("get", "put", "patch", "delete"):
-            operation = schema["paths"]["/tarefas/{task_id}"][method]
+            operation = schema["paths"]["/tarefas/{id}"][method]
             content = operation["responses"]["404"]["content"]["application/json"]
             assert set(_resolve(schema, content["schema"])["properties"]) == ERROR_KEYS

@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from app.api import health, tasks
 from app.api.error_handlers import register_error_handlers
+from app.api.openapi import install_portuguese_openapi
 from app.core import messages
 from app.repositories.in_memory import InMemoryTaskRepository
 
@@ -32,6 +33,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(tasks.router)
     register_error_handlers(app)
+    install_portuguese_openapi(app)
     return app
 
 

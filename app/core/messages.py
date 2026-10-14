@@ -22,7 +22,6 @@ LOG_UNHANDLED_ERROR = "Erro interno não tratado ao processar %s %s."
 
 # --- Validação: campo e mensagem por tipo de erro do Pydantic ---
 FIELD_BODY = "corpo"
-FIELD_LABELS = {"task_id": "id"}
 VALIDATION_FALLBACK = "Valor inválido."
 VALIDATION_ENUM = "Valor inválido. Valores aceitos: {values}."
 VALIDATION_MESSAGES = {
@@ -52,7 +51,30 @@ TAG_TASKS_DESCRIPTION = "Operações sobre tarefas."
 TAG_HEALTH = "Saúde"
 TAG_HEALTH_DESCRIPTION = "Verificação de saúde da aplicação."
 
+# --- OpenAPI: nomes dos componentes (classe em inglês -> nome no esquema) ---
+OPENAPI_COMPONENT_NAMES = {
+    "TaskResponse": "Tarefa",
+    "TaskCreate": "CriacaoDeTarefa",
+    "TaskReplace": "SubstituicaoDeTarefa",
+    "TaskUpdate": "AtualizacaoDeTarefa",
+    "TaskListResponse": "ListaDeTarefas",
+    "TaskStatus": "StatusDaTarefa",
+    "ErrorResponse": "Erro",
+    "ErrorDetail": "DetalheDoErro",
+    "HealthResponse": "RespostaDeSaude",
+}
+
+# --- OpenAPI: identificadores das operações ---
+OPERATION_ID_CREATE_TASK = "criar_tarefa"
+OPERATION_ID_LIST_TASKS = "listar_tarefas"
+OPERATION_ID_GET_TASK = "consultar_tarefa"
+OPERATION_ID_REPLACE_TASK = "substituir_tarefa"
+OPERATION_ID_UPDATE_TASK = "atualizar_tarefa"
+OPERATION_ID_DELETE_TASK = "excluir_tarefa"
+OPERATION_ID_HEALTH = "verificar_saude"
+
 # --- OpenAPI: operações ---
+PARAM_TASK_ID = "Identificador (UUID) da tarefa."
 SUMMARY_CREATE_TASK = "Criar tarefa"
 DESCRIPTION_CREATE_TASK = (
     "Cria uma tarefa. O status padrão é `pendente`; o título é aparado nas pontas."

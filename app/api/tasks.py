@@ -3,7 +3,7 @@
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Query, Response, status
+from fastapi import APIRouter, Depends, Path, Query, Response, status
 
 from app.api.dependencies import get_task_service
 from app.core import messages
@@ -21,6 +21,8 @@ from app.services.task_service import TaskService
 router = APIRouter(prefix="/tarefas", tags=[messages.TAG_TASKS])
 
 Service = Annotated[TaskService, Depends(get_task_service)]
+# O parâmetro de rota aparece como `id` no contrato (alias), e `task_id` no código.
+TaskId = Annotated[uuid.UUID, Path(alias="id", description=messages.PARAM_TASK_ID)]
 
 VALIDATION_ERROR: dict[int | str, dict[str, Any]] = {
     422: {"model": ErrorResponse, "description": messages.RESPONSE_VALIDATION_ERROR}
@@ -34,6 +36,7 @@ NOT_FOUND: dict[int | str, dict[str, Any]] = {
     "",
     response_model=TaskResponse,
     status_code=status.HTTP_201_CREATED,
+    operation_id=messages.OPERATION_ID_CREATE_TASK,
     summary=messages.SUMMARY_CREATE_TASK,
     description=messages.DESCRIPTION_CREATE_TASK,
     response_description=messages.RESPONSE_CREATE_TASK,
@@ -47,6 +50,7 @@ def create_task(data: TaskCreate, service: Service) -> TaskResponse:
 @router.get(
     "",
     response_model=TaskListResponse,
+    operation_id=messages.OPERATION_ID_LIST_TASKS,
     summary=messages.SUMMARY_LIST_TASKS,
     description=messages.DESCRIPTION_LIST_TASKS,
     response_description=messages.RESPONSE_LIST_TASKS,
@@ -75,55 +79,57 @@ def list_tasks(
 
 
 @router.get(
-    "/{task_id}",
+    "/{id}",
     response_model=TaskResponse,
+    operation_id=messages.OPERATION_ID_GET_TASK,
     summary=messages.SUMMARY_GET_TASK,
     description=messages.DESCRIPTION_GET_TASK,
     response_description=messages.RESPONSE_GET_TASK,
     responses={**NOT_FOUND, **VALIDATION_ERROR},
 )
-def get_task(task_id: uuid.UUID, service: Service) -> TaskResponse:
+def get_task(task_id: TaskId, service: Service) -> TaskResponse:
     """Consulta uma tarefa pelo id."""
     return TaskResponse.model_validate(service.get(task_id))
 
 
 @router.put(
-    "/{task_id}",
+    "/{id}",
     response_model=TaskResponse,
+    operation_id=messages.OPERATION_ID_REPLACE_TASK,
     summary=messages.SUMMARY_REPLACE_TASK,
     description=messages.DESCRIPTION_REPLACE_TASK,
     response_description=messages.RESPONSE_REPLACE_TASK,
     responses={**NOT_FOUND, **VALIDATION_ERROR},
 )
-def replace_task(
-    task_id: uuid.UUID, data: TaskReplace, service: Service
-) -> TaskResponse:
+def replace_task(task_id: TaskId, data: TaskReplace, service: Service) -> TaskResponse:
     """Substitui uma tarefa (PUT)."""
     return TaskResponse.model_validate(service.replace(task_id, data))
 
 
 @router.patch(
-    "/{task_id}",
+    "/{id}",
     response_model=TaskResponse,
+    operation_id=messages.OPERATION_ID_UPDATE_TASK,
     summary=messages.SUMMARY_UPDATE_TASK,
     description=messages.DESCRIPTION_UPDATE_TASK,
     response_description=messages.RESPONSE_UPDATE_TASK,
     responses={**NOT_FOUND, **VALIDATION_ERROR},
 )
-def update_task(task_id: uuid.UUID, data: TaskUpdate, service: Service) -> TaskResponse:
+def update_task(task_id: TaskId, data: TaskUpdate, service: Service) -> TaskResponse:
     """Altera só os campos enviados (PATCH)."""
     return TaskResponse.model_validate(service.update(task_id, data))
 
 
 @router.delete(
-    "/{task_id}",
+    "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    operation_id=messages.OPERATION_ID_DELETE_TASK,
     summary=messages.SUMMARY_DELETE_TASK,
     description=messages.DESCRIPTION_DELETE_TASK,
     response_description=messages.RESPONSE_DELETE_TASK,
     responses={**NOT_FOUND, **VALIDATION_ERROR},
 )
-def delete_task(task_id: uuid.UUID, service: Service) -> Response:
+def delete_task(task_id: TaskId, service: Service) -> Response:
     """Exclui uma tarefa."""
     service.delete(task_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

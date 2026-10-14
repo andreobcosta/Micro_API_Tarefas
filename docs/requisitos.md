@@ -59,6 +59,8 @@ API REST para **criar, listar (com filtro por status e paginação), consultar, 
 | valores do enum | `pendente` / `em_andamento` / `concluida` | `PENDING` / `IN_PROGRESS` / `DONE` |
 | itens / total / limite / deslocamento | `itens` / `total` / `limite` / `deslocamento` | `items` / `total` / `limit` / `offset` |
 | erro: código / mensagem / detalhes / campo | `codigo` / `mensagem` / `detalhes` / `campo` | `code` / `message` / `details` / `field` |
+| schemas no OpenAPI | `Tarefa`, `CriacaoDeTarefa`, `SubstituicaoDeTarefa`, `AtualizacaoDeTarefa`, `ListaDeTarefas`, `StatusDaTarefa`, `Erro`, `DetalheDoErro`, `RespostaDeSaude` | `TaskResponse`, `TaskCreate`, `TaskReplace`, `TaskUpdate`, `TaskListResponse`, `TaskStatus`, `ErrorResponse`, `ErrorDetail`, `HealthResponse` |
+| `operationId` / parâmetro de rota | `criar_tarefa`, `listar_tarefas`, `consultar_tarefa`, `substituir_tarefa`, `atualizar_tarefa`, `excluir_tarefa`, `verificar_saude` / `{id}` | `task_id` (alias `id`) |
  
 ### 4.2 Rotas (português)
  
@@ -96,6 +98,7 @@ projeto/
 │  │  ├─ tasks.py                  # APIRouter(prefix="/tarefas")
 │  │  ├─ health.py                 # GET /saude
 │  │  ├─ dependencies.py           # get_task_service (Depends; repositório em app.state)
+│  │  ├─ openapi.py                # nomes dos componentes do OpenAPI em português
 │  │  └─ error_handlers.py         # handlers de erro no contrato em português
 │  ├─ schemas/
 │  │  ├─ task.py                   # aliases PT-BR do contrato
@@ -266,6 +269,7 @@ Toda resposta de erro traz `codigo`, `mensagem` e `detalhes` (`[]` quando não h
 | 5 | `feat(services): regras de negócio das tarefas` (TDD) | 4h |
 | 6 | `feat(api): rotas de tarefas com filtro e paginação` | 5h |
 | 7 | `feat(api): PATCH e tratamento de erros em português` | 3h |
+| 7b | `feat(api): nomes em português no esquema OpenAPI` (commit extra, sem renumerar os demais) | 1h |
 | 8 | `feat(db): repositório SQLAlchemy com SQLite` | 3h |
 | 9 | `test: testes de integração, de idioma e cobertura mínima de 80%` | 3h |
 | 10 | `docs: README, demonstração e seção "Como a IA acelerou este projeto"` | 3h |

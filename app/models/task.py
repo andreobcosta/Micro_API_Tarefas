@@ -7,8 +7,9 @@ from enum import Enum
 
 
 class TaskStatus(str, Enum):
-    """Situação de uma tarefa. O nome é em inglês; o valor é o do contrato."""
+    """Situação de uma tarefa: `pendente`, `em_andamento` ou `concluida`."""
 
+    # Os nomes dos membros são em inglês; os valores são os do contrato.
     PENDING = "pendente"
     IN_PROGRESS = "em_andamento"
     DONE = "concluida"
