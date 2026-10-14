@@ -8,7 +8,7 @@ API REST de tarefas (CRUD + PATCH, filtro por status e paginação) — miniproj
 ## Stack
 - Linguagem: Python 3.11+
 - Framework: FastAPI + Pydantic v2
-- Persistência: SQLite via SQLAlchemy 2.x (`DATABASE_URL` por ambiente)
+- Persistência: SQLite via SQLAlchemy 2.x (`DATABASE_URL` por ambiente; somente SQLite no MVP)
 - Testes: pytest + pytest-cov (+ TestClient do FastAPI)
 - Formatação/lint: black (ruff opcional)
 - LLM: fora do escopo do MVP (só em Próximos Passos)
@@ -64,6 +64,6 @@ Diagrama: `docs/architecture.md`. Decisões: `docs/adr/`.
 4. Se houver ambiguidade de requisito, pergunte antes de codar.
 5. Não expanda o escopo (é um MVP de ~30h); sugira "Próximos Passos" em vez disso.
 ## Estado atual
-Etapa: API HTTP concluída (commits 6, 7 e 7b)
-Próximo passo: Sessão 4, repositório SQLAlchemy com SQLite e testes de integração
+Etapa: persistência e testes concluídos (commits 8 e 9); 244 testes, 100% de cobertura
+Próximo passo: Sessão 5, README completo, Makefile (install, run, test, format), requirements final e tag v1.0.0
 Decisões e log: `docs/adr/`.
