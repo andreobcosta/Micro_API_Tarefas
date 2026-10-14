@@ -118,3 +118,9 @@ RESPONSE_DELETE_TASK = "Tarefa excluída (sem conteúdo)."
 SUMMARY_HEALTH = "Verificar saúde"
 DESCRIPTION_HEALTH = "Indica se a aplicação está respondendo."
 RESPONSE_HEALTH = "Aplicação operacional."
+
+# --- Configuração e persistência ---
+CONFIG_INVALID_LOG_LEVEL = (
+    "Valor inválido para LOG_LEVEL: {value!r}. Use um de: {allowed}."
+)
+NAIVE_DATETIME = "A data deve conter fuso horário (UTC)."

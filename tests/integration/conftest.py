@@ -1,6 +1,6 @@
 """Fixtures da camada HTTP: uma aplicação (e um repositório) novos por teste."""
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from typing import Any
 
 import pytest
@@ -16,8 +16,10 @@ def app() -> FastAPI:
 
 
 @pytest.fixture
-def client(app: FastAPI) -> TestClient:
-    return TestClient(app)
+def client(app: FastAPI) -> Iterator[TestClient]:
+    """Cliente com lifespan ativo (cria as tabelas do SQLite em memória)."""
+    with TestClient(app) as test_client:
+        yield test_client
 
 
 @pytest.fixture

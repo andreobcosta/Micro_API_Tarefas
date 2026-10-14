@@ -29,9 +29,9 @@ class InMemoryTaskRepository:
     def list(
         self, status: TaskStatus | None, limit: int, offset: int
     ) -> tuple[list[Task], int]:
-        """Lista cópias por `created_at` decrescente, com filtro e paginação."""
+        """Lista cópias por `created_at` e `id` decrescentes, com filtro e paginação."""
         matching = [t for t in self._tasks.values() if status in (None, t.status)]
-        matching.sort(key=lambda t: t.created_at, reverse=True)
+        matching.sort(key=lambda t: (t.created_at, t.id), reverse=True)
         page = matching[offset : offset + limit]
         return [replace(t) for t in page], len(matching)
 

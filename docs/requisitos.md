@@ -117,7 +117,8 @@ projeto/
 │  │  ├─ errors.py
 │  │  └─ messages.py               # TODOS os textos em PT-BR centralizados
 │  └─ db/
-│     └─ session.py
+│     ├─ models.py                 # TaskModel (ORM) e UtcDateTime
+│     └─ session.py                # engine, sessões e create_tables
 ├─ tests/
 │  ├─ unit/
 │  └─ integration/
@@ -222,7 +223,7 @@ Toda resposta de erro traz `codigo`, `mensagem` e `detalhes` (`[]` quando não h
 | RNF01 | **Arquitetura em camadas**: `api` → `services` → `repositories` → banco; regra de negócio somente em `services` |
 | RNF02 | **Repositório atrás de interface** (`Protocol`) com implementação SQLAlchemy e implementação **em memória** para testes; injeção via `Depends` |
 | RNF03 | **Qualidade de código**: tipagem estática, PEP 8, docstrings estilo Google, Black (e Ruff, opcional) |
-| RNF04 | **Testes**: pytest; unitários dos serviços (repositório em memória) + integração da API (`TestClient`, SQLite em memória); **cobertura ≥ 80%** com `--cov-fail-under=80` |
+| RNF04 | **Testes**: pytest; unitários dos serviços (repositório em memória) + integração da API (`TestClient`, SQLite em memória e em arquivo temporário); **cobertura ≥ 80%** com `--cov-fail-under=80` |
 | RNF05 | **Testes herméticos**: sem rede, sem dependência de ordem, banco isolado por teste |
 | RNF06 | **Configuração por ambiente** (`DATABASE_URL`, `APP_ENV`, `LOG_LEVEL`); `.env` no `.gitignore`; `.env.example` versionado |
 | RNF07 | **Documentação**: OpenAPI com título, resumos, descrições, tags e exemplos em PT-BR; rotas `/documentacao`, `/referencia` e `/esquema-openapi.json` |

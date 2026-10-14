@@ -4,7 +4,7 @@ Visão da arquitetura em camadas. Requisitos em [requisitos.md](requisitos.md); 
 
 ## 1. Componentes
 
-A regra de negócio fica somente em `services`. O serviço depende da interface `TaskRepository` (Protocol), nunca de uma implementação concreta; a implementação é injetada via `Depends`: `create_app()` guarda o repositório em `app.state.task_repository` e `get_task_service` (em `app/api/dependencies.py`) monta o `TaskService`. Cada chamada de `create_app()` cria um repositório novo, o que isola os testes; os testes também podem trocar o serviço por `app.dependency_overrides`.
+A regra de negócio fica somente em `services`. O serviço depende da interface `TaskRepository` (Protocol), nunca de uma implementação concreta; a implementação é injetada via `Depends`: `create_app()` guarda o repositório em `app.state.task_repository` e `get_task_service` (em `app/api/dependencies.py`) monta o `TaskService`. Sem repositório injetado, `create_app()` monta o `SqlTaskRepository` a partir de `DATABASE_URL` (engine em `app/db/session.py`, tabelas criadas no *lifespan*; ver [adr/0002-persistencia-sqlalchemy-sqlite.md](adr/0002-persistencia-sqlalchemy-sqlite.md)). Cada chamada de `create_app()` cria um repositório novo, o que isola os testes; os testes também podem trocar o serviço por `app.dependency_overrides`.
 
 ```mermaid
 flowchart LR
@@ -12,7 +12,7 @@ flowchart LR
     API["api<br/>(APIRouter /tarefas)"]
     Services["services<br/>(TaskService)"]
     Contract{{"TaskRepository<br/>(Protocol)"}}
-    Sql["repositories<br/>SqlTaskRepository"]
+    Sql["repositories<br/>SqlTaskRepository<br/>(usa db/: models, session)"]
     Mem["repositories<br/>InMemoryTaskRepository<br/>(testes)"]
     DB[("SQLite")]
 

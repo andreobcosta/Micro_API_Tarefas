@@ -251,12 +251,11 @@ class TestHealth:
 
 class TestIsolationAndWiring:
     def test_each_app_has_its_own_repository(self) -> None:
-        first, second = TestClient(create_app()), TestClient(create_app())
+        with TestClient(create_app()) as first, TestClient(create_app()) as second:
+            first.post("/tarefas", json={"titulo": "Só na primeira"})
 
-        first.post("/tarefas", json={"titulo": "Só na primeira"})
-
-        assert first.get("/tarefas").json()["total"] == 1
-        assert second.get("/tarefas").json()["total"] == 0
+            assert first.get("/tarefas").json()["total"] == 1
+            assert second.get("/tarefas").json()["total"] == 0
 
     def test_service_can_be_replaced_with_dependency_overrides(
         self, app: FastAPI, client: TestClient
