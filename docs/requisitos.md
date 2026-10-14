@@ -179,6 +179,7 @@ projeto/
 - Dado `{"status": "em_andamento"}`, então só `status` muda; `titulo` e `descricao` permanecem; `atualizado_em` é atualizado.
 - Dado `{}`, então `422` com mensagem "Informe ao menos um campo para atualizar.".
 - Dado `{"titulo": "x"}`, então `422` (mesma regra de validação do título).
+- Regra de `null` no PATCH: `titulo: null` e `status: null` são inválidos (`422`); `descricao: null` é válido e limpa a descrição. Campos ausentes não são alterados.
 **RF07** — `GET /saude` retorna `200`.
  
 ## 7. Contrato de erro (padronizado, em português)
