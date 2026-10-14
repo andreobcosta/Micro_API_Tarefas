@@ -93,9 +93,13 @@ projeto/
 ├─ app/
 │  ├─ main.py                      # cria a aplicação e registra rotas/handlers
 │  ├─ api/
-│  │  └─ tasks.py                  # APIRouter(prefix="/tarefas")
+│  │  ├─ tasks.py                  # APIRouter(prefix="/tarefas")
+│  │  ├─ health.py                 # GET /saude
+│  │  ├─ dependencies.py           # get_task_service (Depends; repositório em app.state)
+│  │  └─ error_handlers.py         # handlers de erro no contrato em português
 │  ├─ schemas/
-│  │  └─ task.py                   # aliases PT-BR do contrato
+│  │  ├─ task.py                   # aliases PT-BR do contrato
+│  │  └─ health.py
 │  ├─ services/
 │  │  └─ task_service.py
 │  ├─ repositories/
@@ -170,7 +174,7 @@ projeto/
 - Quando `limite=0`, `limite=101` ou `deslocamento=-1`, então `422`.
 - Sem tarefas, então `200` com `itens=[]` e `total=0`.
 **RF03 / RF06**
-- Dado um `id` inexistente, então `404` com `{"codigo": "TAREFA_NAO_ENCONTRADA", "mensagem": "Tarefa não encontrada."}`.
+- Dado um `id` inexistente, então `404` com `{"codigo": "TAREFA_NAO_ENCONTRADA", "mensagem": "Tarefa não encontrada.", "detalhes": []}` (todo erro traz `detalhes`, vazio quando não há itens).
 - Dado um `id` que não é UUID, então `422`.
 - Após `DELETE` com sucesso, um novo `GET` do mesmo `id` retorna `404`.
 **RF04**
@@ -240,7 +244,7 @@ projeto/
 |---|---|
 | Mensagens do framework em inglês vazando para o usuário | Handlers globais + teste de idioma (RNF13) |
 | Campo/valor em inglês escapando para o contrato público | Aliases no Pydantic + teste que compara as chaves do JSON e o esquema OpenAPI com o glossário §4.1 |
-| Mapeamento alias ↔ campo confuso (erros de serialização) | Testes de contrato: resposta usa `titulo`; entrada por nome interno não é exposta; `populate_by_name` só para uso interno |
+| Mapeamento alias ↔ campo confuso (erros de serialização) | Testes de contrato: resposta usa `titulo`. **Limitação assumida:** com `populate_by_name=True` a entrada também aceita o nome interno em inglês (ex.: `{"title": ...}`); o comportamento é mantido de propósito, documentado por teste e listado em "Limitações" do README |
 | Mensagens misturadas PT/EN nos logs | Logs também centralizados em `messages.py` |
 | Versões/APIs inexistentes sugeridas pela IA | Validar com `pip install`/`pip freeze`; revisão crítica de 5 passos |
 | Estilo Pydantic v1 do exemplo do livro | RNF09 no `CLAUDE.md` |

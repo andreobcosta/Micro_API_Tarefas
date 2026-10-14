@@ -69,3 +69,14 @@ class TaskResponse(BaseModel):
     status: TaskStatus
     created_at: datetime = Field(alias="criado_em")
     updated_at: datetime = Field(alias="atualizado_em")
+
+
+class TaskListResponse(BaseModel):
+    """Página de tarefas devolvida por `GET /tarefas`; serialize com `by_alias=True`."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    items: list[TaskResponse] = Field(alias="itens")
+    total: int
+    limit: int = Field(alias="limite")
+    offset: int = Field(alias="deslocamento")
