@@ -99,6 +99,7 @@ projeto/
 │  │  └─ error_handlers.py         # handlers de erro no contrato em português
 │  ├─ schemas/
 │  │  ├─ task.py                   # aliases PT-BR do contrato
+│  │  ├─ error.py                  # ErrorResponse/ErrorDetail (documentam o contrato de erro)
 │  │  └─ health.py
 │  ├─ services/
 │  │  └─ task_service.py
@@ -181,7 +182,7 @@ projeto/
 - Dado corpo sem `status`, então `422`. Dado corpo completo válido, então `200` e `atualizado_em` maior que o anterior.
 **RF05**
 - Dado `{"status": "em_andamento"}`, então só `status` muda; `titulo` e `descricao` permanecem; `atualizado_em` é atualizado.
-- Dado `{}`, então `422` com mensagem "Informe ao menos um campo para atualizar.".
+- Dado `{}`, então `422` com `mensagem` de topo "Os dados enviados são inválidos." e `detalhes[0] = {"campo": "corpo", "mensagem": "Informe ao menos um campo para atualizar."}`.
 - Dado `{"titulo": "x"}`, então `422` (mesma regra de validação do título).
 - Regra de `null` no PATCH: `titulo: null` e `status: null` são inválidos (`422`); `descricao: null` é válido e limpa a descrição. Campos ausentes não são alterados.
 **RF07** — `GET /saude` retorna `200`.
@@ -193,18 +194,21 @@ projeto/
   "codigo": "VALIDACAO_INVALIDA",
   "mensagem": "Os dados enviados são inválidos.",
   "detalhes": [
-    {"campo": "titulo", "mensagem": "O título deve ter no mínimo 3 caracteres."}
+    {"campo": "titulo", "mensagem": "Deve ter no mínimo 3 caracteres."}
   ]
 }
 ```
+ 
+Toda resposta de erro traz `codigo`, `mensagem` e `detalhes` (`[]` quando não há itens). Cada item de `detalhes` tem só `campo` e `mensagem`; nunca `input`, `ctx`, `url` nem stack trace. O `campo` sai sem o prefixo de origem (`body`, `query`, `path`); o parâmetro de rota aparece como `id`, e erros do corpo inteiro (JSON malformado, PATCH `{}`) usam `corpo`.
  
 | Situação | HTTP | `codigo` |
 |---|---|---|
 | Validação (corpo, parâmetros, UUID) | 422 | `VALIDACAO_INVALIDA` |
 | Tarefa inexistente | 404 | `TAREFA_NAO_ENCONTRADA` |
 | Rota inexistente | 404 | `ROTA_NAO_ENCONTRADA` |
-| Método não permitido | 405 | `METODO_NAO_PERMITIDO` |
-| Erro inesperado | 500 | `ERRO_INTERNO` (sem vazar detalhes internos) |
+| Método não permitido | 405 | `METODO_NAO_PERMITIDO` (mantém o cabeçalho `Allow`) |
+| Outro erro HTTP do framework | o do erro | `ERRO_HTTP` |
+| Erro inesperado | 500 | `ERRO_INTERNO` (sem vazar detalhes internos; o detalhe vai só para o log) |
  
 > **Atenção técnica:** o FastAPI/Pydantic gera mensagens em **inglês** por padrão (validação, 404/405 de rota, `detail`). Para cumprir D6 é preciso *exception handlers* para `RequestValidationError`, `StarletteHTTPException` (404/405) e `Exception` (500), mapeando os tipos de erro do Pydantic (`missing`, `string_too_short`, `string_too_long`, `enum`, `uuid_parsing`, `greater_than_equal`, `less_than_equal`, `int_parsing`, `json_invalid`…) para mensagens em português. Centralizar todos os textos em `app/core/messages.py`.
  

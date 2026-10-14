@@ -6,6 +6,36 @@ TASK_NOT_FOUND = "Tarefa não encontrada."
 
 # --- Códigos do contrato de erro ---
 CODE_TASK_NOT_FOUND = "TAREFA_NAO_ENCONTRADA"
+CODE_VALIDATION = "VALIDACAO_INVALIDA"
+CODE_ROUTE_NOT_FOUND = "ROTA_NAO_ENCONTRADA"
+CODE_METHOD_NOT_ALLOWED = "METODO_NAO_PERMITIDO"
+CODE_HTTP_ERROR = "ERRO_HTTP"
+CODE_INTERNAL_ERROR = "ERRO_INTERNO"
+
+# --- Mensagens de erro do contrato ---
+VALIDATION_FAILED = "Os dados enviados são inválidos."
+ROUTE_NOT_FOUND = "Rota não encontrada."
+METHOD_NOT_ALLOWED = "Método não permitido para esta rota."
+HTTP_ERROR = "Não foi possível processar a requisição."
+INTERNAL_ERROR = "Erro interno do servidor. Tente novamente mais tarde."
+LOG_UNHANDLED_ERROR = "Erro interno não tratado ao processar %s %s."
+
+# --- Validação: campo e mensagem por tipo de erro do Pydantic ---
+FIELD_BODY = "corpo"
+FIELD_LABELS = {"task_id": "id"}
+VALIDATION_FALLBACK = "Valor inválido."
+VALIDATION_ENUM = "Valor inválido. Valores aceitos: {values}."
+VALIDATION_MESSAGES = {
+    "missing": "Campo obrigatório.",
+    "string_too_short": "Deve ter no mínimo {min_length} caracteres.",
+    "string_too_long": "Deve ter no máximo {max_length} caracteres.",
+    "string_type": "Deve ser um texto.",
+    "uuid_parsing": "Identificador inválido. Informe um UUID válido.",
+    "greater_than_equal": "Deve ser maior ou igual a {ge}.",
+    "less_than_equal": "Deve ser menor ou igual a {le}.",
+    "int_parsing": "Deve ser um número inteiro.",
+    "json_invalid": "JSON malformado.",
+}
 
 # --- Saúde ---
 HEALTH_OK = "operacional"
@@ -49,6 +79,15 @@ DESCRIPTION_REPLACE_TASK = (
     "`descricao` ausente vira `null`."
 )
 RESPONSE_REPLACE_TASK = "Tarefa substituída."
+
+SUMMARY_UPDATE_TASK = "Atualizar tarefa parcialmente"
+DESCRIPTION_UPDATE_TASK = (
+    "Altera apenas os campos enviados. Informe ao menos um campo; "
+    "`descricao: null` limpa a descrição, e `titulo` e `status` não aceitam `null`."
+)
+RESPONSE_UPDATE_TASK = "Tarefa atualizada."
+
+RESPONSE_VALIDATION_ERROR = "Dados inválidos na requisição."
 
 SUMMARY_DELETE_TASK = "Excluir tarefa"
 DESCRIPTION_DELETE_TASK = "Remove uma tarefa pelo seu identificador."
