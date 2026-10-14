@@ -64,6 +64,6 @@ Diagrama: `docs/architecture.md`. Decisões: `docs/adr/`.
 4. Se houver ambiguidade de requisito, pergunte antes de codar.
 5. Não expanda o escopo (é um MVP de ~30h); sugira "Próximos Passos" em vez disso.
 ## Estado atual
-Etapa: Fundação concluída (commits 1 e 2)
-Próximo passo: Sessão 2 — núcleo com TDD
+Etapa: Núcleo do domínio concluído (commits 3 a 5)
+Próximo passo: Sessão 3, API HTTP com filtro/paginação, PATCH e erros em português
 Decisões e log: `docs/adr/`.
