@@ -239,7 +239,7 @@ Toda resposta de erro traz `codigo`, `mensagem` e `detalhes` (`[]` quando não h
 | Exigência | Como atendemos |
 |---|---|
 | Repositório público | GitHub, `main` limpa |
-| ≥ 5 commits Conventional Commits | Plano de 11 commits (§11), descrições em português |
+| ≥ 5 commits Conventional Commits | Plano de commits (§11), descrições em português |
 | README completo | Em português; inclui seção de IA e "Limitações e Próximos Passos" |
 | Dependências | `requirements.txt` |
 | Testes passando | `make test` com cobertura ≥ 80% |
