@@ -64,6 +64,6 @@ Diagrama: `docs/architecture.md`. Decisões: `docs/adr/`.
 4. Se houver ambiguidade de requisito, pergunte antes de codar.
 5. Não expanda o escopo (é um MVP de ~30h); sugira "Próximos Passos" em vez disso.
 ## Estado atual
-Etapa: Núcleo do domínio concluído (commits 3 a 5)
-Próximo passo: Sessão 3, API HTTP com filtro/paginação, PATCH e erros em português
+Etapa: API HTTP concluída (commits 6, 7 e 7b)
+Próximo passo: Sessão 4, repositório SQLAlchemy com SQLite e testes de integração
 Decisões e log: `docs/adr/`.
