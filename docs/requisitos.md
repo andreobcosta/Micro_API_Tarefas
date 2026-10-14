@@ -81,7 +81,7 @@ API REST para **criar, listar (com filtro por status e paginação), consultar, 
 | Contrato de repositório | `TaskRepository` (Protocol) |
 | Implementações | `SqlTaskRepository`, `InMemoryTaskRepository` |
 | Serviço | `TaskService` (`create`, `list`, `get`, `replace`, `update`, `delete`) |
-| Exceções de domínio | `TaskNotFoundError`, `InvalidDataError` |
+| Exceções de domínio | `TaskNotFoundError` (`InvalidDataError` será criada quando houver regra que a use) |
 | Variáveis de ambiente | `DATABASE_URL`, `APP_ENV`, `LOG_LEVEL` |
 | Alvos do Makefile | `install`, `run`, `test`, `format` |
 | Testes | `tests/**/test_*.py`, funções `test_*` (padrão do pytest, sem configuração especial) |
