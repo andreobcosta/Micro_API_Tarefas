@@ -2,8 +2,10 @@
 
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import Engine
 
 from app.api import health, tasks
@@ -14,6 +16,10 @@ from app.core.config import Settings
 from app.db.session import create_db_engine, create_session_factory, create_tables
 from app.repositories.base import TaskRepository
 from app.repositories.sql_repository import SqlTaskRepository
+
+# Interface web estática (HTML, CSS e JavaScript puros), servida pela própria API.
+STATIC_DIR = Path(__file__).parent / "static"
+WEB_MOUNT_PATH = "/app"
 
 
 def create_app(
@@ -62,6 +68,7 @@ def create_app(
     app.state.task_repository = repository
     app.include_router(health.router)
     app.include_router(tasks.router)
+    app.mount(WEB_MOUNT_PATH, StaticFiles(directory=STATIC_DIR, html=True), name="web")
     register_error_handlers(app)
     install_portuguese_openapi(app)
     return app

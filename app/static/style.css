@@ -1,0 +1,104 @@
+/* Interface web da Micro-API de Tarefas. Sem fontes nem recursos externos. */
+
+:root {
+  --fundo: #f4f6f5;
+  --cartao: #ffffff;
+  --borda: #dce2df;
+  --texto: #1f2a28;
+  --texto-secundario: #5b6764;
+  --destaque: #0f6b5e;
+  --erro: #b3261e;
+  --erro-fundo: #fdecea;
+  --raio: 12px;
+  --alvo-toque: 44px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--destaque);
+}
+
+:focus-visible {
+  outline: 3px solid var(--destaque);
+  outline-offset: 2px;
+}
+
+main:focus {
+  outline: none;
+}
+
+.topo {
+  background: var(--cartao);
+  border-bottom: 1px solid var(--borda);
+}
+
+.topo__conteudo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 12px 16px;
+}
+
+.topo__titulo {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.topo__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.topo__nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo-toque);
+  padding: 0 12px;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.topo__nav a[aria-current="page"] {
+  background: var(--destaque);
+  color: #ffffff;
+}
+
+#conteudo {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+#conteudo.largo {
+  max-width: 1040px;
+}
+
+.avisos {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.sem-script {
+  max-width: 880px;
+  margin: 24px auto;
+  padding: 0 16px;
+}

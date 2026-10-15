@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'"
+    />
+    <title>Micro-API de Tarefas</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topo">
+      <div class="topo__conteudo">
+        <h1 class="topo__titulo">Micro-API de Tarefas</h1>
+        <nav class="topo__nav" aria-label="Principal">
+          <a href="#/tarefas" data-rota="#/tarefas">Tarefas</a>
+          <a href="#/painel" data-rota="#/painel">Painel</a>
+          <a href="/documentacao">Documentação da API</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="conteudo" tabindex="-1"></main>
+
+    <div id="avisos" class="avisos" aria-live="polite"></div>
+
+    <noscript>
+      <p class="sem-script">
+        Esta interface precisa de JavaScript. A API continua disponível em
+        <a href="/documentacao">/documentacao</a>.
+      </p>
+    </noscript>
+
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
