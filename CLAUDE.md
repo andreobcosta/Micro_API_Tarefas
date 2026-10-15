@@ -20,8 +20,8 @@ API REST de tarefas (CRUD + PATCH, filtro por status e paginação) — miniproj
 - Instalar: `make install`
 - Rodar: `make run`
 - Testes: `make test` (falha se cobertura < 80%)
-- Atenção: o `Makefile` só existe a partir do commit 11; até lá usar `pytest` e `uvicorn` diretamente.
 - Formatar: `make format`
+- Ajuda: `make help` (o `install` cria o `.venv` se faltar)
 ## Arquitetura (resumo)
 Camadas: `api` → `services` → `repositories` → banco. Regra de negócio só em `services`. Repositório atrás de `TaskRepository` (Protocol).
 Diagrama: `docs/architecture.md`. Decisões: `docs/adr/`.
@@ -64,6 +64,6 @@ Diagrama: `docs/architecture.md`. Decisões: `docs/adr/`.
 4. Se houver ambiguidade de requisito, pergunte antes de codar.
 5. Não expanda o escopo (é um MVP de ~30h); sugira "Próximos Passos" em vez disso.
 ## Estado atual
-Etapa: persistência e testes concluídos (commits 8 e 9); 244 testes, 100% de cobertura
-Próximo passo: Sessão 5, README completo, Makefile (install, run, test, format), requirements final e tag v1.0.0
+Etapa: entrega concluída (README, demonstração, Makefile e requirements final); 244 testes, 100% de cobertura
+Próximo passo: verificação de submissão, tag v1.0.0 e push (somente com autorização)
 Decisões e log: `docs/adr/`.
