@@ -1,14 +1,12 @@
-// Tela "Tarefas" (#/tarefas): lista, filtro por status e paginação.
+// Tela "Tarefas" (#/tarefas): criação, lista, filtro, paginação, edição,
+// mudança de status e exclusão.
 
-import { describeError, listTasks } from "./api.js";
+import { errorAlert } from "./alerta.js";
+import { createTask, deleteTask, listTasks, updateTask } from "./api.js";
+import { taskCard } from "./cartao.js";
 import { el } from "./dom.js";
-import {
-  FILTERS,
-  STATUS,
-  TEXTS,
-  UNKNOWN_STATUS,
-  pageSummary,
-} from "./messages.js";
+import { createTaskForm } from "./formulario.js";
+import { FILTERS, NOTICES, TEXTS, pageSummary } from "./messages.js";
 
 const PAGE_SIZE = 10;
 
@@ -17,51 +15,45 @@ function lastPageOffset(total) {
   return (Math.ceil(total / PAGE_SIZE) - 1) * PAGE_SIZE;
 }
 
-function statusBadge(status) {
-  const known = Object.hasOwn(STATUS, status) ? STATUS[status] : null;
-  return el("span", {
-    class: `selo ${(known ?? UNKNOWN_STATUS).badge}`,
-    text: known ? known.label : String(status),
-  });
-}
-
-function taskCard(task) {
-  const finished = task.status === "concluida";
-  const description =
-    task.descricao === null
-      ? el("p", { class: "cartao__descricao secundario", text: TEXTS.noDescription })
-      : el("p", { class: "cartao__descricao", text: task.descricao });
-
-  return el(
-    "article",
-    { class: "cartao", dataset: { id: task.id } },
-    el(
-      "div",
-      { class: "cartao__cabecalho" },
-      el("h3", {
-        class: finished ? "cartao__titulo riscado" : "cartao__titulo",
-        text: task.titulo,
-      }),
-      statusBadge(task.status),
-    ),
-    description,
-  );
+/** Anuncia o texto na região aria-live da página. */
+function announce(text) {
+  const region = document.getElementById("avisos");
+  if (!region) return;
+  // Limpar antes garante que um texto repetido seja anunciado de novo.
+  region.textContent = "";
+  setTimeout(() => {
+    region.textContent = text;
+  }, 50);
 }
 
 /**
  * Monta a tela de tarefas dentro de `root`.
  *
  * O estado vive nesta chamada: cada visita à rota começa do zero (filtro
- * "Todas", primeira página).
+ * "Todas", primeira página, nenhuma edição aberta).
  */
 export function mountTasks(root) {
-  const state = { filter: null, offset: 0, ticket: 0, view: "loading", data: null, error: null };
+  const state = {
+    filter: null,
+    offset: 0,
+    ticket: 0,
+    view: "loading",
+    data: null,
+    error: null,
+    editing: null,
+    confirming: null,
+  };
 
   const heading = el("h2", {
     class: "tarefas__titulo",
     text: TEXTS.listTitle,
     attrs: { tabindex: "-1" },
   });
+
+  const form = createTaskForm({ submit: createTask, onCreated: handleCreated });
+
+  // Aviso visível da última ação; o anúncio para leitores de tela vai em #avisos.
+  const notice = el("p", { class: "nota", attrs: { hidden: true } });
 
   const filterButtons = FILTERS.map((filter) =>
     el("button", {
@@ -100,7 +92,38 @@ export function mountTasks(root) {
     next,
   );
 
-  root.replaceChildren(el("section", { class: "tarefas" }, heading, filterBar, list, pagination));
+  root.replaceChildren(
+    el("section", { class: "tarefas" }, heading, form, notice, filterBar, list, pagination),
+  );
+
+  function showNotice(text, kind = "ok") {
+    notice.textContent = text;
+    notice.className = `nota nota--${kind}`;
+    notice.removeAttribute("hidden");
+    announce(text);
+  }
+
+  function clearNotice() {
+    notice.textContent = "";
+    notice.setAttribute("hidden", "");
+  }
+
+  function modeOf(task) {
+    if (state.editing === task.id) return "edit";
+    if (state.confirming === task.id) return "confirm";
+    return "view";
+  }
+
+  function findCard(id) {
+    return [...list.children].find((child) => child.dataset && child.dataset.id === id) ?? null;
+  }
+
+  /** Foca um elemento do cartão (`data-foco`); sem ele, o título da tela. */
+  function focusCard(id, target) {
+    const card = findCard(id);
+    const node = card ? card.querySelector(`[data-foco="${target}"]`) : null;
+    (node ?? heading).focus();
+  }
 
   function renderFilters() {
     FILTERS.forEach((filter, index) => {
@@ -118,25 +141,13 @@ export function mountTasks(root) {
     }
 
     if (state.view === "error") {
-      const { message, details } = describeError(state.error);
-      const alert = el(
-        "div",
-        { class: "alerta", attrs: { role: "alert", tabindex: "-1" } },
-        el("p", { class: "alerta__mensagem", text: message }),
-        details.length > 0
-          ? el(
-              "ul",
-              { class: "alerta__detalhes" },
-              details.map((detail) => el("li", { text: detail })),
-            )
-          : null,
-        el("button", {
-          class: "botao",
-          text: TEXTS.retry,
-          attrs: { type: "button" },
-          on: { click: () => load() },
-        }),
-      );
+      const retry = el("button", {
+        class: "botao",
+        text: TEXTS.retry,
+        attrs: { type: "button" },
+        on: { click: () => load() },
+      });
+      const alert = errorAlert(state.error, { retry });
       list.replaceChildren(alert);
       return alert;
     }
@@ -153,7 +164,7 @@ export function mountTasks(root) {
       );
       return null;
     }
-    list.replaceChildren(...items.map(taskCard));
+    list.replaceChildren(...items.map((task) => taskCard(task, modeOf(task), actions)));
     return null;
   }
 
@@ -225,19 +236,97 @@ export function mountTasks(root) {
     }
   }
 
+  function resetInteraction() {
+    state.editing = null;
+    state.confirming = null;
+    clearNotice();
+  }
+
   async function changeFilter(value) {
     if (value === state.filter) return;
     state.filter = value;
     state.offset = 0;
+    resetInteraction();
     await load();
     recoverFocus();
   }
 
   async function goTo(offset) {
     state.offset = Math.max(0, offset);
+    resetInteraction();
     await load();
     recoverFocus();
   }
+
+  /** Depois de criar: volta à primeira página, mantendo o filtro. */
+  async function handleCreated(task) {
+    resetInteraction();
+    state.offset = 0;
+    const hidden = state.filter !== null && task.status !== state.filter;
+    showNotice(hidden ? NOTICES.createdHidden : NOTICES.created);
+    await load();
+  }
+
+  /** Depois de PATCH: recarrega a lista e devolve o foco ao cartão. */
+  async function handleUpdated(id, updated) {
+    state.editing = null;
+    state.confirming = null;
+    const hidden = state.filter !== null && updated.status !== state.filter;
+    showNotice(hidden ? NOTICES.updatedHidden : NOTICES.updated);
+    await load();
+    focusCard(id, "cartao");
+  }
+
+  // Ações dos cartões. Abrir uma edição fecha a anterior sem salvar.
+  const actions = {
+    startEdit(task) {
+      clearNotice();
+      state.editing = task.id;
+      state.confirming = null;
+      renderList();
+      focusCard(task.id, "titulo");
+    },
+    cancelEdit(task) {
+      state.editing = null;
+      renderList();
+      focusCard(task.id, "editar");
+    },
+    async save(task, patch) {
+      clearNotice();
+      await handleUpdated(task.id, await updateTask(task.id, patch));
+    },
+    async changeStatus(task, status) {
+      clearNotice();
+      await handleUpdated(task.id, await updateTask(task.id, { status }));
+    },
+    askDelete(task) {
+      clearNotice();
+      state.confirming = task.id;
+      state.editing = null;
+      renderList();
+      focusCard(task.id, "cancelar");
+    },
+    cancelDelete(task) {
+      state.confirming = null;
+      renderList();
+      focusCard(task.id, "excluir");
+    },
+    async confirmDelete(task) {
+      clearNotice();
+      await deleteTask(task.id);
+      resetInteraction();
+      showNotice(NOTICES.deleted);
+      await load();
+      heading.focus();
+    },
+    /** A tarefa não existe mais (404): avisa e atualiza a lista. */
+    async gone() {
+      resetInteraction();
+      showNotice(TEXTS.notFoundError, "erro");
+      await load();
+      heading.focus();
+    },
+  };
 
   return load();
 }

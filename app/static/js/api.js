@@ -33,13 +33,23 @@ function isErrorContract(payload) {
   );
 }
 
-async function request(path) {
+async function request(path, { method = "GET", body } = {}) {
+  const headers = { Accept: "application/json" };
+  const init = { method, headers };
+  if (body !== undefined) {
+    headers["Content-Type"] = "application/json";
+    init.body = JSON.stringify(body);
+  }
+
   let response;
   try {
-    response = await fetch(path, { headers: { Accept: "application/json" } });
+    response = await fetch(path, init);
   } catch {
     throw new ApiError({ kind: "rede" });
   }
+
+  // DELETE bem-sucedido: 204, sem corpo.
+  if (response.status === 204) return null;
 
   let payload = null;
   try {
@@ -68,6 +78,59 @@ export function listTasks({ status, limit, offset }) {
   params.set("limite", String(limit));
   params.set("deslocamento", String(offset));
   return request(`${TASKS_PATH}?${params.toString()}`);
+}
+
+/**
+ * Cria uma tarefa (POST /tarefas).
+ *
+ * O corpo é enviado como o usuário digitou; a validação é da API.
+ *
+ * @param {{titulo: string, descricao?: string}} body
+ * @returns {Promise<object>} A tarefa criada.
+ */
+export function createTask(body) {
+  return request(TASKS_PATH, { method: "POST", body });
+}
+
+/**
+ * Atualiza parcialmente uma tarefa (PATCH /tarefas/{id}).
+ *
+ * @param {string} id
+ * @param {{titulo?: string, descricao?: string|null, status?: string}} patch
+ * @returns {Promise<object>} A tarefa atualizada.
+ */
+export function updateTask(id, patch) {
+  return request(`${TASKS_PATH}/${encodeURIComponent(id)}`, { method: "PATCH", body: patch });
+}
+
+/**
+ * Exclui uma tarefa (DELETE /tarefas/{id}).
+ *
+ * @param {string} id
+ * @returns {Promise<null>}
+ */
+export function deleteTask(id) {
+  return request(`${TASKS_PATH}/${encodeURIComponent(id)}`, { method: "DELETE" });
+}
+
+/** Indica se o erro é "tarefa não encontrada" (404 no contrato da API). */
+export function isNotFound(error) {
+  return error instanceof ApiError && error.kind === "api" && error.status === 404;
+}
+
+/**
+ * Indica se algum detalhe de validação aponta para o campo informado.
+ *
+ * @param {unknown} error
+ * @param {string} field Nome do campo no contrato (ex.: "titulo").
+ */
+export function hasFieldError(error, field) {
+  if (!(error instanceof ApiError)) return false;
+  return error.detalhes.some(
+    (item) =>
+      typeof item.campo === "string" &&
+      (item.campo === field || item.campo.endsWith(`.${field}`)),
+  );
 }
 
 /**

@@ -24,6 +24,16 @@ export const STATUS = {
 
 export const UNKNOWN_STATUS = { badge: "selo--desconhecido" };
 
+// Uma única ação rápida por status: rótulo e status de destino.
+export const QUICK_ACTIONS = {
+  pendente: { label: "Iniciar", next: "em_andamento" },
+  em_andamento: { label: "Concluir", next: "concluida" },
+  concluida: { label: "Reabrir", next: "pendente" },
+};
+
+// Limites dos campos (maxlength). A validação em si é da API.
+export const LIMITS = { title: 100, description: 500 };
+
 // `value: null` significa "Todas": o parâmetro `status` não é enviado.
 export const FILTERS = [
   { value: null, label: "Todas" },
@@ -37,8 +47,18 @@ export const TEXTS = {
   filterGroup: "Filtrar por status",
   loading: "Carregando tarefas…",
   empty: "Nenhuma tarefa encontrada.",
-  emptyHint: "Quando houver tarefas com este filtro, elas aparecem aqui.",
+  emptyHint: "Crie uma tarefa no formulário acima ou escolha outro filtro.",
   noDescription: "Sem descrição.",
+  newTask: "Nova tarefa",
+  titleLabel: "Título",
+  descriptionLabel: "Descrição (opcional)",
+  create: "Criar tarefa",
+  edit: "Editar",
+  remove: "Excluir",
+  save: "Salvar",
+  cancel: "Cancelar",
+  confirmQuestion: "Excluir esta tarefa?",
+  confirmRemove: "Confirmar exclusão",
   retry: "Tentar de novo",
   previous: "Anterior",
   next: "Próxima",
@@ -49,6 +69,20 @@ export const TEXTS = {
   notFoundError: "Esta tarefa não existe mais. A lista foi atualizada.",
   unknownError: "Algo deu errado. Tente novamente.",
 };
+
+// Avisos de ação concluída (visíveis e anunciados em aria-live).
+export const NOTICES = {
+  created: "Tarefa criada.",
+  createdHidden: "Tarefa criada com status pendente. Ela não aparece no filtro atual.",
+  updated: "Tarefa atualizada.",
+  updatedHidden: "Tarefa atualizada. Ela não aparece mais neste filtro.",
+  deleted: "Tarefa excluída.",
+};
+
+/** Nome acessível de um botão de cartão: "Editar: Título da tarefa". */
+export function actionLabel(action, title) {
+  return `${action}: ${title}`;
+}
 
 /** Texto da paginação: "Página X de Y · N tarefas". */
 export function pageSummary(page, pages, total) {

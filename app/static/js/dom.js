@@ -42,3 +42,19 @@ export function el(tag, options = {}, ...children) {
   node.append(...valid);
   return node;
 }
+
+/**
+ * Campo de formulário com rótulo associado (`label for` + `id` do controle).
+ *
+ * @param {string} labelText Texto do rótulo.
+ * @param {HTMLElement} control Controle que já tem o atributo `id`.
+ * @returns {HTMLElement}
+ */
+export function labeledField(labelText, control) {
+  return el(
+    "div",
+    { class: "campo" },
+    el("label", { class: "campo__rotulo", text: labelText, attrs: { for: control.id } }),
+    control,
+  );
+}
