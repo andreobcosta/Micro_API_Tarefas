@@ -4,7 +4,7 @@
 import { errorAlert } from "./alerta.js";
 import { createTask, deleteTask, listTasks, updateTask } from "./api.js";
 import { taskCard } from "./cartao.js";
-import { el } from "./dom.js";
+import { announce, el } from "./dom.js";
 import { createTaskForm } from "./formulario.js";
 import { FILTERS, NOTICES, TEXTS, pageSummary } from "./messages.js";
 
@@ -13,17 +13,6 @@ const PAGE_SIZE = 10;
 /** Deslocamento da última página que existe para `total` itens. */
 function lastPageOffset(total) {
   return (Math.ceil(total / PAGE_SIZE) - 1) * PAGE_SIZE;
-}
-
-/** Anuncia o texto na região aria-live da página. */
-function announce(text) {
-  const region = document.getElementById("avisos");
-  if (!region) return;
-  // Limpar antes garante que um texto repetido seja anunciado de novo.
-  region.textContent = "";
-  setTimeout(() => {
-    region.textContent = text;
-  }, 50);
 }
 
 /**

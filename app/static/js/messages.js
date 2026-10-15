@@ -6,11 +6,7 @@
 
 export const ROUTES = {
   "#/tarefas": { title: "Tarefas", wide: false },
-  "#/painel": {
-    title: "Painel",
-    description: "O painel gerencial aparece aqui.",
-    wide: true,
-  },
+  "#/painel": { title: "Painel", wide: true },
 };
 
 export const DEFAULT_ROUTE = "#/tarefas";
@@ -68,6 +64,26 @@ export const TEXTS = {
     "Não foi possível falar com o servidor. Verifique a conexão e tente novamente.",
   notFoundError: "Esta tarefa não existe mais. A lista foi atualizada.",
   unknownError: "Algo deu errado. Tente novamente.",
+};
+
+// Textos do painel gerencial.
+export const PANEL = {
+  title: "Painel",
+  refresh: "Atualizar",
+  retry: "Tentar de novo",
+  loading: "Carregando painel…",
+  updated: "Painel atualizado.",
+  total: "Total",
+  distribution: "Distribuição por status",
+  progress: "Progresso de conclusão",
+  latest: "Últimas tarefas",
+  columns: ["Título", "Status", "Criada em", "Atualizada em"],
+  noTasks: "Nenhuma tarefa cadastrada.",
+  noTasksYet: "Nenhuma tarefa ainda.",
+  noDate: "—",
+  note: "Os números refletem o momento da última atualização. Datas no horário de Brasília.",
+  progressText: (done, total, percent) =>
+    `${done} de ${total} ${done === 1 ? "concluída" : "concluídas"} (${percent}%)`,
 };
 
 // Avisos de ação concluída (visíveis e anunciados em aria-live).

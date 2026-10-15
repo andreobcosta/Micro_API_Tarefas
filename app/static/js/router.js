@@ -1,14 +1,16 @@
 // Navegação por hash (#/tarefas e #/painel), sem recarregar a página.
 
 import { DEFAULT_ROUTE, ROUTES } from "./messages.js";
+import { mountDashboard } from "./painel.js";
 import { mountTasks } from "./tarefas.js";
 
 const NAV_LINKS = document.querySelectorAll("a[data-rota]");
 const MAIN = document.getElementById("conteudo");
 
-// Rotas com tela própria; as demais mostram só o título e uma descrição.
+// Tela de cada rota (as chaves coincidem com as de ROUTES em messages.js).
 const VIEWS = {
   "#/tarefas": mountTasks,
+  "#/painel": mountDashboard,
 };
 
 /** Rota atual; hash desconhecido ou vazio cai na rota padrão. */
@@ -28,25 +30,11 @@ function markCurrentLink(route) {
   }
 }
 
-function renderPlaceholder({ title, description }) {
-  const heading = document.createElement("h2");
-  heading.textContent = title;
-  const text = document.createElement("p");
-  text.textContent = description;
-  MAIN.replaceChildren(heading, text);
-}
-
 function render(route) {
   const config = ROUTES[route];
   MAIN.classList.toggle("largo", config.wide);
   document.title = `${config.title} · Micro-API de Tarefas`;
-
-  const mount = Object.hasOwn(VIEWS, route) ? VIEWS[route] : null;
-  if (mount) {
-    mount(MAIN);
-  } else {
-    renderPlaceholder(config);
-  }
+  VIEWS[route](MAIN);
 }
 
 function navigate() {

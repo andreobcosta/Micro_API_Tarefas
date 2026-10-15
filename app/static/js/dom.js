@@ -43,6 +43,17 @@ export function el(tag, options = {}, ...children) {
   return node;
 }
 
+/** Anuncia o texto na região aria-live (`#avisos`) da página. */
+export function announce(text) {
+  const region = document.getElementById("avisos");
+  if (!region) return;
+  // Limpar antes garante que um texto repetido seja anunciado de novo.
+  region.textContent = "";
+  setTimeout(() => {
+    region.textContent = text;
+  }, 50);
+}
+
 /**
  * Campo de formulário com rótulo associado (`label for` + `id` do controle).
  *
