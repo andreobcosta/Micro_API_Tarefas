@@ -339,16 +339,16 @@ O projeto foi construído com **Claude Code** (modelo Claude Sonnet 5.5) no VS C
 
 ### Tempo
 
-As horas abaixo são o **tempo previsto no plano de commits** (`docs/requisitos.md` §11). **O tempo real não foi cronometrado** `[CONFIRMAR HORAS REAIS]`. Não há, portanto, cálculo de ganho de produtividade em percentual nem estimativa de "tempo sem IA".
+As horas previstas vêm do plano de commits (requisitos §11). As horas estimadas foram calculadas ao final do projeto, com base no histórico das conversas de trabalho; não houve cronometragem. Não há, portanto, cálculo de ganho de produtividade em percentual nem estimativa de "tempo sem IA".
 
-| Sessão | Escopo (commits) | Horas previstas | Resultado | Ganho (qualitativo) |
-|---|---|---|---|---|
-| 1 | Fundação: estrutura, docs, 3 diagramas Mermaid (1–2) | ~3 h `[CONFIRMAR HORAS REAIS]` | 2 commits Conventional; Mermaid validado no mermaid.live | Alto (docs e scaffolding) |
-| 2 | Núcleo com TDD: schemas, repositório em memória, serviço (3–5) | ~9 h `[CONFIRMAR HORAS REAIS]` | 82 testes, 100% de cobertura; 3 provas de mutação (`min_length`, ordenação, `updated_at`/PATCH) derrubaram os testes certos | Alto (testes e scaffolding) |
-| 3 | API HTTP (6, 7 e 7b) | ~9 h `[CONFIRMAR HORAS REAIS]` | 177 testes, 100% de cobertura; mutações em cada commit; OpenAPI sem textos em inglês | Alto |
-| 4 | Persistência SQLAlchemy + SQLite (8–9) | ~6 h `[CONFIRMAR HORAS REAIS]` | 244 testes, 100% de cobertura; 4 mutações no commit 8 e 6 no commit 9, todas pegas; persistência provada com `uvicorn` real | Alto |
-
-Total previsto até a sessão 4: ~27 h; restante (commits 10–11): ~4 h; total do plano: ~31 h (a meta da disciplina é ~30 h; a tabela do §11 soma 31 h).
+| Sessão | Escopo (commits) | Previsto no plano | Estimado | Resultado | Ganho (qualitativo) |
+|---|---|---|---|---|---|
+| 1 | Fundação: estrutura, docs, 3 diagramas Mermaid (1–2) | ~3 h | ~3 h | 2 commits Conventional; Mermaid validado no mermaid.live | Alto (docs e scaffolding) |
+| 2 | Núcleo com TDD: schemas, repositório em memória, serviço (3–5) | ~9 h | ~3 h | 82 testes, 100% de cobertura; 3 provas de mutação (`min_length`, ordenação, `updated_at`/PATCH) derrubaram os testes certos | Alto (testes e scaffolding) |
+| 3 | API HTTP (6, 7 e 7b) | ~9 h | ~4 h | 177 testes, 100% de cobertura; mutações em cada commit; OpenAPI sem textos em inglês | Alto |
+| 4 | Persistência SQLAlchemy + SQLite (8–9) | ~6 h | ~3 h | 244 testes, 100% de cobertura; 4 mutações no commit 8 e 6 no commit 9, todas pegas; persistência provada com `uvicorn` real | Alto |
+| 5 | Entrega: README, demonstração, Makefile e dependências (10–11) | ~4 h | ~2 h | README, demonstração, Makefile e requirements final; 244 testes, 100% | — |
+| **Total** | | **~31 h** | **~15 h** | | |
 
 ### O ciclo de trabalho
 
