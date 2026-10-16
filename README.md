@@ -433,7 +433,7 @@ Idioma v1.2 (código em inglês, contrato em português por aliases e valores de
 
 ## Limitações
 
-Seja honesto com quem usa: estas são as limitações conhecidas (as da interface web, ao final da lista, são posteriores à v1.0.0).
+Limitações conhecidas (as da interface web, ao final da lista, são posteriores à v1.0.0).
 
 - **A entrada também aceita nomes internos em inglês** (por exemplo `{"title": "..."}`), por causa de `populate_by_name=True`, necessário para montar a resposta a partir da entidade. É documentado por teste; a saída sempre usa o contrato em português.
 - **O traceback do log do erro 500 sai em inglês** (uvicorn/Python). A resposta ao cliente é sempre em português e não vaza detalhes internos.
