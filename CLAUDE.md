@@ -3,7 +3,7 @@
 > Contexto permanente para o Claude Code. Mantenha curto. Detalhes em `docs/`.
  
 ## Visão
-API REST de tarefas (CRUD + PATCH, filtro por status e paginação) — miniprojeto da pós "Engenharia de Software Aplicado com IA". Requisitos completos em `docs/requisitos.md` (v1.2); decisão de stack em `docs/adr/0001-*.md`.
+API REST de tarefas (CRUD + PATCH, filtro por status e paginação) — miniprojeto da pós "Engenharia de Software Aplicado com IA". Requisitos completos em `docs/requisitos.md` (v1.3); decisão de stack em `docs/adr/0001-*.md`.
  
 ## Stack
 - Linguagem: Python 3.11+
@@ -22,6 +22,7 @@ API REST de tarefas (CRUD + PATCH, filtro por status e paginação) — miniproj
 - Testes: `make test` (falha se cobertura < 80%)
 - Formatar: `make format`
 - Ajuda: `make help` (o `install` cria o `.venv` se faltar)
+- Interface web: com `make run`, abrir `http://127.0.0.1:8000/app/` (tarefas) e `/app/#/painel` (painel). Arquivos estáticos em `app/static/`, sem build (ADR-0003).
 ## Arquitetura (resumo)
 Camadas: `api` → `services` → `repositories` → banco. Regra de negócio só em `services`. Repositório atrás de `TaskRepository` (Protocol).
 Diagrama: `docs/architecture.md`. Decisões: `docs/adr/`.
@@ -64,6 +65,6 @@ Diagrama: `docs/architecture.md`. Decisões: `docs/adr/`.
 4. Se houver ambiguidade de requisito, pergunte antes de codar.
 5. Não expanda o escopo (é um MVP de ~30h); sugira "Próximos Passos" em vez disso.
 ## Estado atual
-Etapa: entrega concluída (README, demonstração, Makefile e requirements final); 244 testes, 100% de cobertura
-Próximo passo: verificação de submissão, tag v1.0.0 e push (somente com autorização)
+Etapa: interface web pronta no branch `feat/frontend` (commits 1–4: serve /app, tarefas, painel, docs); 273 testes, 100% de cobertura
+Próximo passo: merge em `main` e tag v1.1.0 (somente com autorização)
 Decisões e log: `docs/adr/`.

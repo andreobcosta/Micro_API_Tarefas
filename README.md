@@ -11,8 +11,9 @@ O contrato público (campos do JSON, valores do enum, rotas, mensagens de erro e
 - Erros sempre no mesmo formato `{codigo, mensagem, detalhes[]}`, inclusive os do framework (404, 405, 422, 500).
 - Persistência em SQLite via SQLAlchemy 2.x.
 - Documentação interativa em `/documentacao` (Swagger UI) e `/referencia` (ReDoc).
+- Interface web em `/app/` (tarefas) e `/app/#/painel` (painel gerencial), servida pela própria API.
 
-**Em números:** 244 testes, 100% de cobertura (mínimo exigido: 80%).
+**Em números:** 273 testes: 244 existentes na v1.0.0 e 29 novos, de servimento e segurança da interface, 100% de cobertura (mínimo exigido: 80%).
 
 ## Demonstração
 
@@ -31,6 +32,7 @@ POST /tarefas  ->  GET /tarefas?status=pendente  ->  PUT  ->  PATCH  ->  DELETE 
 | Validação e contrato | Pydantic 2.14.1 |
 | Persistência | SQLAlchemy 2.1.4 + SQLite |
 | Testes | pytest 9.1.1, pytest-cov 7.1.0, TestClient do FastAPI (via `httpx2`) |
+| Interface web | HTML, CSS e JavaScript (módulos ES) puros, sem build, sem framework e sem recursos externos |
 | Formatação | Black 26.10.1 |
 | Diagramas | Mermaid |
 | Assistentes de IA | Claude Code (modelo Claude Sonnet 5.5) no VS Code, para implementação; Claude como mentor técnico em um Project com a base de conhecimento do curso |
@@ -96,6 +98,8 @@ Com `make`: `make run`. A API sobe em `http://127.0.0.1:8000`; as tabelas são c
 | Swagger UI | `http://127.0.0.1:8000/documentacao` |
 | ReDoc | `http://127.0.0.1:8000/referencia` |
 | Esquema OpenAPI | `http://127.0.0.1:8000/esquema-openapi.json` |
+| Interface web (tarefas) | `http://127.0.0.1:8000/app/` |
+| Interface web (painel) | `http://127.0.0.1:8000/app/#/painel` |
 
 ### Endpoints
 
@@ -271,16 +275,55 @@ try {
 - Passar o corpo como *string* com acento (por exemplo `-Body '{"titulo": "ação"}'`) envia bytes Latin-1; a API responde `400` `ERRO_HTTP`. Envie sempre **bytes UTF-8** (função `J` acima) e `charset=utf-8`.
 - O PS 5.1 decodifica respostas `application/json` sem `charset` como ISO-8859-1, então `Invoke-RestMethod` pode exibir `demonstraÃ§Ã£o`. Os dados no servidor estão corretos (veja o curl). Para ver os acentos, decodifique `RawContentStream` como UTF-8 com `Invoke-WebRequest`, ou use o PowerShell 7+.
 
+## Interface web
+
+Uma interface web simples acompanha a API e é servida por ela, na mesma origem (sem CORS). São arquivos estáticos em `app/static/` (HTML, CSS e JavaScript puros): não há build, framework, CDN nem fontes externas, então funciona offline. Decisão registrada em [ADR-0003](docs/adr/0003-interface-web-estatica.md).
+
+Com a API no ar (`make run`):
+
+| Tela | Endereço | Para que serve |
+|---|---|---|
+| Tarefas | `http://127.0.0.1:8000/app/` | Criar, listar, filtrar, editar, concluir e excluir tarefas |
+| Painel | `http://127.0.0.1:8000/app/#/painel` | Visão gerencial: totais, distribuição por status, progresso e últimas tarefas |
+
+### Como usar (passo a passo)
+
+**Criar uma tarefa**
+1. Em **Tarefas**, preencha o **Título** (e, se quiser, a **Descrição**) no cartão "Nova tarefa".
+2. Clique em **Criar tarefa**. A tarefa aparece no topo da lista com o status "Pendente".
+3. Se os dados forem inválidos, a mensagem da API aparece no formulário e nada é criado.
+
+**Filtrar e navegar**
+1. Use os botões **Todas**, **Pendentes**, **Em andamento** e **Concluídas**.
+2. A lista mostra 10 tarefas por página. Use **Anterior** e **Próxima**; o resumo indica a página e o total.
+
+**Mudar o status**
+- Cada cartão tem um único botão de avanço: **Iniciar** (pendente → em andamento), **Concluir** (em andamento → concluída) ou **Reabrir** (concluída → pendente).
+
+**Editar**
+1. Clique em **Editar** no cartão, altere título e/ou descrição e clique em **Salvar**. **Cancelar** (ou a tecla `Esc`) descarta a alteração.
+2. Apagar a descrição e salvar volta a mostrar "Sem descrição.".
+
+**Excluir**
+1. Clique em **Excluir**: o cartão pede confirmação ("Excluir esta tarefa?").
+2. **Confirmar exclusão** apaga a tarefa; **Cancelar** mantém.
+
+**Painel**
+- Mostra o total e os totais por status, a distribuição em barras, o progresso de conclusão e as 5 últimas tarefas (datas no horário de Brasília). **Atualizar** busca os números de novo.
+
+> A interface não valida os dados por conta própria: exibe a `mensagem` e os `detalhes` que a API devolve. Isso mantém uma única fonte de regras.
+
 ## Testes e cobertura
 
 ```powershell
 python -m pytest --cov=app --cov-report=term-missing --cov-fail-under=80
 ```
 
-Com `make`: `make test`. Estado atual: **244 testes passando, 100% de cobertura**. O comando falha se a cobertura ficar abaixo de 80%.
+Com `make`: `make test`. Estado atual: **273 testes passando, 100% de cobertura**. O comando falha se a cobertura ficar abaixo de 80%.
 
 - `tests/unit` (132 testes): `test_repository_contract.py` (46, roda contra a implementação em memória e a SQL), `test_task_schemas.py` (32), `test_task_service.py` (28), `test_sql_repository.py` (11), `test_sql_session.py` (7), `test_settings.py` (5), `test_utc_datetime.py` (3).
-- `tests/integration` (112 testes): `test_tasks_api.py` (39), `test_error_handling.py` (25), `test_openapi_names.py` (12), `test_sql_file_api.py` (12, SQLite em arquivo), `test_tasks_patch_api.py` (12), `test_language.py` (9, o **teste de idioma**) e `test_app_factory.py` (3).
+- `tests/integration` (141 testes): `test_tasks_api.py` (39), `test_error_handling.py` (25), `test_web_static.py` (29, servimento da interface em `/app` e regras de segurança do código estático), `test_openapi_names.py` (12), `test_sql_file_api.py` (12, SQLite em arquivo), `test_tasks_patch_api.py` (12), `test_language.py` (9, o **teste de idioma**) e `test_app_factory.py` (3).
+- **O JavaScript da interface não tem testes automatizados** (ver Limitações): `test_web_static.py` verifica que os arquivos são servidos com o tipo correto, que não há script nem estilo inline e que o código não usa `innerHTML`, `eval` e similares.
 - **Hermeticidade (verificável):** a API é chamada em processo, pelo `TestClient` do FastAPI (`tests/integration/conftest.py`), sem servidor nem socket; `grep` em `tests/` não encontra `requests`, `socket`, `urllib`, `uvicorn` nem URLs `http(s)://`. O banco é SQLite em memória (`sqlite://`) ou em arquivo dentro de `tmp_path`, e `tests/conftest.py` fixa `DATABASE_URL=sqlite://` em todos os testes.
 
 A cobertura sozinha não prova qualidade: por isso cada etapa teve **prova de mutação** (alterar o código de propósito e conferir que o teste certo falha).
@@ -297,6 +340,7 @@ app/
   repositories/            # base.py (Protocol), in_memory.py, sql_repository.py
   schemas/                 # contrato Pydantic (task, error, health)
   services/task_service.py # regras de negócio
+  static/                  # interface web (servida em /app): index.html, style.css, js/ (módulos ES; messages.js centraliza os textos)
 tests/                     # unit/ e integration/
 docs/                      # requisitos, architecture, demo, adr/
 ```
@@ -327,11 +371,12 @@ Os diagramas de sequência (`GET /tarefas`) e da entidade `Task` (contrato PT-BR
 
 ### Documentação e decisões
 
-- [docs/requisitos.md](docs/requisitos.md): requisitos v1.2, contrato de erro e plano de commits.
+- [docs/requisitos.md](docs/requisitos.md): requisitos v1.3, contrato de erro e plano de commits.
 - [docs/architecture.md](docs/architecture.md): diagramas e trade-offs.
 - [docs/demo.md](docs/demo.md): roteiro de demonstração.
 - [ADR-0001](docs/adr/0001-miniprojeto-e-stack.md): escolha do miniprojeto e da stack.
 - [ADR-0002](docs/adr/0002-persistencia-sqlalchemy-sqlite.md): persistência com SQLAlchemy 2.x e SQLite.
+- [ADR-0003](docs/adr/0003-interface-web-estatica.md): interface web estática servida pela própria API, sem build.
 
 ## Como a IA acelerou este projeto
 
@@ -349,6 +394,8 @@ As horas previstas vêm do plano de commits (requisitos §11). As horas estimada
 | 4 | Persistência SQLAlchemy + SQLite (8–9) | ~6 h | ~3 h | 244 testes, 100% de cobertura; 4 mutações no commit 8 e 6 no commit 9, todas pegas; persistência provada com `uvicorn` real | Alto |
 | 5 | Entrega: README, demonstração, Makefile e dependências (10–11) | ~4 h | ~2 h | README, demonstração, Makefile e requirements final; 244 testes, 100% | — |
 | **Total** | | **~31 h** | **~15 h** | | |
+
+Após a v1.0.0, a interface web foi desenvolvida no mesmo ciclo (Plan mode, revisão e commit com aprovação); as horas dela não foram estimadas.
 
 ### O ciclo de trabalho
 
@@ -386,7 +433,7 @@ Idioma v1.2 (código em inglês, contrato em português por aliases e valores de
 
 ## Limitações
 
-Seja honesto com quem usa: estas são as limitações conhecidas do v1.0.0.
+Seja honesto com quem usa: estas são as limitações conhecidas (as da interface web, ao final da lista, são posteriores à v1.0.0).
 
 - **A entrada também aceita nomes internos em inglês** (por exemplo `{"title": "..."}`), por causa de `populate_by_name=True`, necessário para montar a resposta a partir da entidade. É documentado por teste; a saída sempre usa o contrato em português.
 - **O traceback do log do erro 500 sai em inglês** (uvicorn/Python). A resposta ao cliente é sempre em português e não vaza detalhes internos.
@@ -400,6 +447,10 @@ Seja honesto com quem usa: estas são as limitações conhecidas do v1.0.0.
 - **Corpo que não é UTF-8 válido** responde `400` com `ERRO_HTTP` (em português), e não `422` `VALIDACAO_INVALIDA`.
 - **O cabeçalho `Allow` do `405`** em `DELETE /tarefas` listou apenas `POST` ao executar os exemplos, embora a rota também aceite `GET`. Observado; causa provável: comportamento do Starlette com rotas separadas para o mesmo caminho; não investigado.
 - **Testado apenas no Windows** (Python 3.13.14); Linux/macOS e Python 3.11/3.12 não foram exercitados.
+- **Interface web: sem testes automatizados do JavaScript.** A validação do comportamento (foco, edição inline, confirmação, painel) foi manual; os testes cobrem só o servimento estático e a segurança do código.
+- **Interface web: a edição aberta é descartada em qualquer recarga** (mudar de filtro ou de página, mudar o status ou excluir outra tarefa, ou abrir outra edição). Não há rascunho.
+- **Painel: é uma fotografia dos números** do momento da última atualização, sem tempo médio nem séries por dia, porque a API não fornece esses dados. Os totais vêm de 4 chamadas a `GET /tarefas` que não são atômicas; se houver escrita entre elas, a tabela de últimas tarefas pode divergir de um total em uma unidade.
+- **Interface web: sem central de ajuda dentro da tela.** O passo a passo está neste README.
 
 ## Próximos Passos
 
@@ -410,6 +461,9 @@ Seja honesto com quem usa: estas são as limitações conhecidas do v1.0.0.
 - CI com GitHub Actions (testes e cobertura a cada push).
 - Docker.
 - Ordenação configurável na listagem.
+- Endpoint de resumo (por exemplo `GET /tarefas/resumo`) para o painel buscar os números em uma única chamada e permitir tempo médio e séries por dia.
+- Testes de interface com Playwright (cobrir foco, edição inline, confirmação e painel).
+- Central de ajuda dentro da interface (manual de uso na própria tela).
 - Integração com LLM (somente aqui; fora do escopo do MVP).
 
 ## Créditos e licença

@@ -1,7 +1,7 @@
 # Requisitos — Micro-API de Gerenciamento de Tarefas
  
-**Versão:** 1.2 (regra de idioma redefinida por Andreo em 2026-10-13) · **Esforço-alvo:** ~30h
-**Stack:** Python 3.11+, FastAPI, Pydantic v2, SQLAlchemy 2.x, SQLite, pytest
+**Versão:** 1.3 (interface web acrescentada por Andreo em 2026-10-15; regra de idioma redefinida na 1.2, em 2026-10-13) · **Esforço-alvo:** ~30h (API v1.0.0)
+**Stack:** Python 3.11+, FastAPI, Pydantic v2, SQLAlchemy 2.x, SQLite, pytest; interface web em HTML, CSS e JavaScript puros
  
 ## 1. Visão
  
@@ -40,8 +40,8 @@ API REST para **criar, listar (com filtro por status e paginação), consultar, 
  
 ## 3. Escopo
  
-**Dentro:** RF01–RF07, RNF01–RNF13.
-**Fora (vai para "Próximos Passos" do README):** autenticação/autorização, multiusuário, front-end, deploy, migrações (Alembic), PostgreSQL, ordenação configurável, busca textual, recursos com LLM (ex.: sugerir subtarefas), exclusão lógica.
+**Dentro:** RF01–RF09, RNF01–RNF14.
+**Fora (vai para "Próximos Passos" do README):** autenticação/autorização, multiusuário, deploy, migrações (Alembic), PostgreSQL, ordenação configurável, busca textual, recursos com LLM (ex.: sugerir subtarefas), exclusão lógica, endpoint de resumo para o painel, testes automatizados da interface (ex.: Playwright), central de ajuda dentro da interface.
  
 ## 4. Glossário de nomenclatura
  
@@ -116,9 +116,13 @@ projeto/
 │  │  ├─ config.py
 │  │  ├─ errors.py
 │  │  └─ messages.py               # TODOS os textos em PT-BR centralizados
-│  └─ db/
-│     ├─ models.py                 # TaskModel (ORM) e UtcDateTime
-│     └─ session.py                # engine, sessões e create_tables
+│  ├─ db/
+│  │  ├─ models.py                 # TaskModel (ORM) e UtcDateTime
+│  │  └─ session.py                # engine, sessões e create_tables
+│  └─ static/                      # interface web, servida em /app (RF08, RF09)
+│     ├─ index.html
+│     ├─ style.css
+│     └─ js/                       # módulos ES; messages.js centraliza os textos
 ├─ tests/
 │  ├─ unit/
 │  └─ integration/
@@ -157,6 +161,8 @@ projeto/
 | RF05 | **Atualizar parcialmente** — `PATCH /tarefas/{id}`; qualquer subconjunto de `titulo`, `descricao`, `status`; corpo vazio é inválido | Must |
 | RF06 | **Excluir tarefa** — `DELETE /tarefas/{id}` → `204` ou `404` | Must |
 | RF07 | **Verificação de saúde** — `GET /saude` → `200` `{"status": "operacional"}` | Could |
+| RF08 | **Interface de tarefas** — página em `/app/` para criar, listar (filtro por status e paginação de 10), editar, mudar o status e excluir tarefas, usando apenas a API existente | Could |
+| RF09 | **Painel gerencial** — página em `/app/#/painel` com total, totais por status, distribuição, progresso de conclusão e 5 últimas tarefas | Could |
  
 ### Parâmetros de listagem (RF02)
  
@@ -190,6 +196,19 @@ projeto/
 - Dado `{"titulo": "x"}`, então `422` (mesma regra de validação do título).
 - Regra de `null` no PATCH: `titulo: null` e `status: null` são inválidos (`422`); `descricao: null` é válido e limpa a descrição. Campos ausentes não são alterados.
 **RF07** — `GET /saude` retorna `200`.
+**RF08**
+- Quando `GET /app/`, então `200` com `text/html` e a lista de tarefas é carregada de `GET /tarefas?limite=10&deslocamento=0`.
+- Dado o filtro "Em andamento", então só essas tarefas aparecem e a paginação respeita o `total` filtrado.
+- Dado título válido, quando "Criar tarefa", então a tarefa aparece na lista (volta ao deslocamento 0, mantendo o filtro). Dado título inválido, então a `mensagem` e os `detalhes` devolvidos pela API são exibidos, sem pré-validação no navegador.
+- Dado um cartão, quando o botão de avanço é acionado, então o status muda por `PATCH` (pendente → em andamento → concluída → pendente).
+- Dada uma exclusão, então há confirmação explícita antes do `DELETE`; "Cancelar" mantém a tarefa.
+- Dado erro de rede ou `404` em tarefa já removida, então uma mensagem em português é exibida e a lista é atualizada.
+**RF09**
+- Dadas 0 tarefas, então todos os totais valem 0, o progresso mostra "Nenhuma tarefa ainda." com `aria-valuenow="0"` e a tabela mostra "Nenhuma tarefa cadastrada.".
+- Dadas tarefas em vários status, então o total é a soma dos três totais por status e os percentuais são inteiros arredondados.
+- Então a tabela "Últimas tarefas" lista as 5 mais recentes com Título, Status, Criada em e Atualizada em, em `dd/mm/aaaa hh:mm` no horário de Brasília.
+- Quando "Atualizar", então os números são buscados de novo; se falhar, os números anteriores permanecem e há opção de tentar de novo.
+- **Aviso:** o painel usa só dados da API atual (4 chamadas a `GET /tarefas`: 3 com `status` e `limite=1`, 1 com `limite=5`). É uma fotografia do momento, **sem tempo médio nem séries por dia**, e as chamadas não são atômicas.
  
 ## 7. Contrato de erro (padronizado, em português)
  
@@ -233,6 +252,7 @@ Toda resposta de erro traz `codigo`, `mensagem` e `detalhes` (`[]` quando não h
 | RNF11 | **Segurança básica**: validação de toda entrada; sem segredos no repositório; respostas de erro sem stack trace |
 | RNF12 | **Desempenho**: sem requisito formal; listagem sempre paginada (limite máximo 100) |
 | RNF13 | **Idioma (D6)**: nada em inglês no que o sistema apresenta (contrato JSON, mensagens, logs, OpenAPI); verificado por **teste automatizado de idioma** (afirma chaves e mensagens em português, incluindo erros do framework) |
+| RNF14 | **Interface web estática**: sem build, framework nem CDN (funciona offline); servida pela própria API na mesma origem; CSP `default-src 'self'` (sem script ou estilo inline); DOM montado só com `createElement`/`textContent` (sem `innerHTML`); textos em `js/messages.js`; sem alterar o contrato da API. Verificado por `tests/integration/test_web_static.py`; o comportamento do JavaScript é validado manualmente (ver Limitações no README) |
  
 ## 9. Conformidade com a disciplina
  
@@ -288,4 +308,5 @@ Toda resposta de erro traz `codigo`, `mensagem` e `detalhes` (`[]` quando não h
 ## Histórico de versões
 - **1.0** — requisitos iniciais (status como enum, filtro, paginação, PATCH, cobertura ≥ 80%).
 - **1.1** — tudo em português, inclusive identificadores (substituída).
-- **1.2** — contrato público e textos em português; código interno em inglês (**vigente**).
+- **1.2** — contrato público e textos em português; código interno em inglês (substituída).
+- **1.3** — interface web (RF08, RF09, RNF14); "front-end" sai de "Fora" do escopo; API inalterada (**vigente**).

@@ -6,6 +6,8 @@ Visão da arquitetura em camadas. Requisitos em [requisitos.md](requisitos.md); 
 
 A regra de negócio fica somente em `services`. O serviço depende da interface `TaskRepository` (Protocol), nunca de uma implementação concreta; a implementação é injetada via `Depends`: `create_app()` guarda o repositório em `app.state.task_repository` e `get_task_service` (em `app/api/dependencies.py`) monta o `TaskService`. Sem repositório injetado, `create_app()` monta o `SqlTaskRepository` a partir de `DATABASE_URL` (engine em `app/db/session.py`, tabelas criadas no *lifespan*; ver [adr/0002-persistencia-sqlalchemy-sqlite.md](adr/0002-persistencia-sqlalchemy-sqlite.md)). Cada chamada de `create_app()` cria um repositório novo, o que isola os testes; os testes também podem trocar o serviço por `app.dependency_overrides`.
 
+A interface web (`app/static/`: HTML, CSS e JavaScript puros) é servida pela própria aplicação por `StaticFiles` em `/app`, na mesma origem, e fala com a API pelas rotas `/tarefas` já existentes; não há camada nova no servidor (ver [adr/0003-interface-web-estatica.md](adr/0003-interface-web-estatica.md)).
+
 ```mermaid
 flowchart LR
     Cliente["Cliente HTTP"]
@@ -95,3 +97,4 @@ classDiagram
 - **Erros do framework em inglês:** exigem handlers globais e mensagens centralizadas em `app/core/messages.py`, com teste automatizado de idioma.
 - **Swagger UI/ReDoc:** os rótulos da interface permanecem em inglês (framework); mitigado com títulos, descrições e exemplos em português.
 - **Listagem sempre paginada** (limite máximo 100), ordenada por `criado_em` decrescente: evita respostas ilimitadas, sem ordenação configurável no MVP.
+- **Interface web estática na mesma origem:** sem build, CDN nem CORS, e sem tocar o contrato; custo: o JavaScript não tem testes automatizados e o painel calcula tudo no cliente a partir de `GET /tarefas` (fotografia, sem tempo médio nem séries por dia) até existir um endpoint de resumo.
