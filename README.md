@@ -28,6 +28,24 @@ Execute todos os comandos na **pasta raiz do projeto** (a que contém `requireme
 
 **1. Obter o código**
 
+Primeiro vá para uma pasta onde você possa gravar arquivos. Não clone dentro de `C:\WINDOWS\System32` (o Windows nega a gravação); se o PowerShell abrir ali, troque de pasta antes.
+
+Windows (PowerShell):
+
+```powershell
+Set-Location $HOME
+```
+
+Ou use uma pasta curta, como `C:\projetos`: `New-Item -ItemType Directory -Force C:\projetos` e depois `Set-Location C:\projetos`.
+
+Linux / macOS:
+
+```bash
+cd ~
+```
+
+Depois, clone o repositório e entre na pasta:
+
 ```text
 git clone https://github.com/andreobcosta/Micro_API_Tarefas.git
 cd Micro_API_Tarefas
@@ -86,6 +104,7 @@ Para usar a interface, siga o [passo a passo da Interface web](#interface-web).
 | Sintoma | Causa | O que fazer |
 |---|---|---|
 | `ERROR: Could not open requirements file: [Errno 2] No such file or directory: 'requirements.txt'`; ou `Acesso negado` ao criar o `.venv` (Windows em português) | O terminal não está na pasta do projeto (por exemplo, o PowerShell abriu em `C:\WINDOWS\System32`) | Vá até a pasta clonada com `Set-Location <caminho>\Micro_API_Tarefas` (ou `cd`) e repita o passo |
+| `fatal: could not create work tree dir 'Micro_API_Tarefas': Permission denied` ao rodar `git clone` | O terminal está numa pasta protegida (por exemplo, `C:\WINDOWS\System32`) | `Set-Location $HOME` (ou outra pasta sua) e repita o `git clone` |
 | `a execução de scripts foi desabilitada neste sistema` ao ativar o `.venv` no PowerShell | A política de execução do PowerShell bloqueia scripts | `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` e repita a ativação. Vale só para essa janela; a política do computador não muda |
 | `O termo 'python' não é reconhecido como nome de cmdlet, função, arquivo de script ou programa operável` | Python não instalado, ou instalado sem estar no `PATH` | Instale em python.org marcando **Add python.exe to PATH**, ou use `py` no lugar de `python` (por exemplo `py -m venv .venv`) |
 | `error while attempting to bind on address ('127.0.0.1', 8000)` | A porta 8000 já está em uso por outro programa (talvez outro servidor seu) | Feche o outro servidor, ou use outra porta: `python -m uvicorn app.main:app --port 8001` e troque `8000` por `8001` nos endereços |
