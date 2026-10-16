@@ -4,6 +4,8 @@ API REST para criar, listar (com filtro por status e paginação), consultar, at
 
 O contrato público (campos do JSON, valores do enum, rotas, mensagens de erro e documentação OpenAPI) é inteiramente em **português do Brasil**; o código interno é em inglês.
 
+**Neste documento:** [Início rápido](#início-rápido) · [Interface web](#interface-web) · [Endpoints](#endpoints) · [Testes](#testes-e-cobertura) · [Limitações](#limitações)
+
 **O que a API faz**
 
 - CRUD de tarefas, com `PUT` (substituição) e `PATCH` (atualização parcial).
@@ -14,6 +16,81 @@ O contrato público (campos do JSON, valores do enum, rotas, mensagens de erro e
 - Interface web em `/app/` (tarefas) e `/app/#/painel` (painel gerencial), servida pela própria API.
 
 **Em números:** 273 testes: 244 existentes na v1.0.0 e 29 novos, de servimento e segurança da interface, 100% de cobertura (mínimo exigido: 80%).
+
+## Início rápido
+
+Do zero ao sistema aberto no navegador, sem `make` e sem configuração.
+
+- Antes de começar, confira: Python 3.11 ou superior (`python --version`) e Git (`git --version`).
+- Como instalar cada um está em [Pré-requisitos](#pré-requisitos).
+
+Execute todos os comandos na **pasta raiz do projeto** (a que contém `requirements.txt`) e mantenha o terminal aberto enquanto usa o sistema.
+
+**1. Obter o código**
+
+```text
+git clone https://github.com/andreobcosta/Micro_API_Tarefas.git
+cd Micro_API_Tarefas
+```
+
+Sem Git: no GitHub, **Code > Download ZIP**, extraia o arquivo e abra o terminal dentro da pasta extraída, que se chama `Micro_API_Tarefas-main` (é a que contém `requirements.txt`).
+
+**2. Criar e ativar o ambiente virtual (`.venv`)**
+
+Windows (PowerShell):
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+Linux / macOS:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Com o ambiente ativo, o início da linha do terminal passa a mostrar `(.venv)`. Se algo falhar, veja [Solução de problemas](#solução-de-problemas).
+
+**3. Instalar as dependências** (igual nos dois sistemas)
+
+```text
+python -m pip install -r requirements.txt
+```
+
+**4. Subir o servidor** (igual nos dois sistemas)
+
+```text
+python -m uvicorn app.main:app
+```
+
+Quando aparecer uma linha com `Uvicorn running on http://127.0.0.1:8000`, o servidor está pronto.
+
+A primeira execução cria o arquivo `tasks.db` na pasta (banco SQLite, ignorado pelo Git). O banco começa vazio.
+
+**5. Abrir no navegador**
+
+| O que | Endereço |
+|---|---|
+| Interface web (tarefas) | `http://127.0.0.1:8000/app/` |
+| Painel gerencial | `http://127.0.0.1:8000/app/#/painel` |
+| Documentação interativa (Swagger) | `http://127.0.0.1:8000/documentacao` |
+
+**6. Parar o servidor:** no terminal em que ele está rodando, `Ctrl+C`.
+
+Para usar a interface, siga o [passo a passo da Interface web](#interface-web).
+
+### Solução de problemas
+
+| Sintoma | Causa | O que fazer |
+|---|---|---|
+| `ERROR: Could not open requirements file: [Errno 2] No such file or directory: 'requirements.txt'`; ou `Acesso negado` ao criar o `.venv` (Windows em português) | O terminal não está na pasta do projeto (por exemplo, o PowerShell abriu em `C:\WINDOWS\System32`) | Vá até a pasta clonada com `Set-Location <caminho>\Micro_API_Tarefas` (ou `cd`) e repita o passo |
+| `a execução de scripts foi desabilitada neste sistema` ao ativar o `.venv` no PowerShell | A política de execução do PowerShell bloqueia scripts | `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` e repita a ativação. Vale só para essa janela; a política do computador não muda |
+| `O termo 'python' não é reconhecido como nome de cmdlet, função, arquivo de script ou programa operável` | Python não instalado, ou instalado sem estar no `PATH` | Instale em python.org marcando **Add python.exe to PATH**, ou use `py` no lugar de `python` (por exemplo `py -m venv .venv`) |
+| `error while attempting to bind on address ('127.0.0.1', 8000)` | A porta 8000 já está em uso por outro programa (talvez outro servidor seu) | Feche o outro servidor, ou use outra porta: `python -m uvicorn app.main:app --port 8001` e troque `8000` por `8001` nos endereços |
+| Em `http://127.0.0.1:8000/` aparece `{"codigo":"ROTA_NAO_ENCONTRADA", ...}` (erro 404) | A interface não fica na raiz | Abra `http://127.0.0.1:8000/app/` (com a barra final) |
+| `python -m venv .venv` falha em `ensurepip` (`returned non-zero exit status 1`) | Caminho da pasta longo demais no Windows (mais de 260 caracteres) | Use uma pasta de caminho curto, como `C:\projetos` |
 
 ## Demonstração
 
@@ -39,29 +116,20 @@ POST /tarefas  ->  GET /tarefas?status=pendente  ->  PUT  ->  PATCH  ->  DELETE 
 
 ## Pré-requisitos
 
-- Python 3.11 ou superior (a suíte foi executada em Python 3.13.14).
-- `pip` e o módulo `venv`.
-- Opcional: GNU Make (`make --version`) para os atalhos `make install|run|test|format`.
+| Item | Como conferir | Onde instalar |
+|---|---|---|
+| Python 3.11 ou superior | `python --version` deve mostrar `3.11` ou maior (no Windows, se `python` não for reconhecido, tente `py --version`; no Linux/macOS, `python3 --version`) | [python.org](https://www.python.org/downloads/) (no Windows, marque **Add python.exe to PATH**) |
+| `pip` e `venv` | `python -m pip --version` | Já vêm com o Python. No Debian/Ubuntu pode ser preciso instalar `python3-venv` (`sudo apt install python3-venv`); não testado nesta entrega |
+| Git (para clonar; dispensável se baixar o ZIP) | `git --version` | [git-scm.com](https://git-scm.com/downloads) |
+| GNU Make (opcional) | `make --version` | Só para os atalhos `make install\|run\|test\|format` |
+
+A suíte foi executada somente em Python 3.13.14; as demais versões 3.11+ não foram exercitadas.
 
 As versões das dependências estão fixadas em [requirements.txt](requirements.txt). Instalação e testes foram validados em **Windows 11 (PowerShell 5.1)**; Linux/macOS seguem os mesmos comandos, mas não foram executados nesta entrega.
 
 ## Instalação e configuração
 
-**Windows (PowerShell)**
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-```
-
-**Linux / macOS**
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-```
+Execute os comandos na pasta raiz do projeto (a que contém `requirements.txt`). O passo a passo completo (criar o `.venv`, instalar as dependências e subir o servidor) está no [Início rápido](#início-rápido).
 
 Com `make`: `make install` (detecta o sistema e cria o `.venv` se faltar).
 
@@ -92,6 +160,8 @@ python -m uvicorn app.main:app --reload
 ```
 
 Com `make`: `make run`. A API sobe em `http://127.0.0.1:8000`; as tabelas são criadas na partida.
+
+`--reload` reinicia o servidor a cada mudança no código e serve para desenvolvimento; para apenas usar o sistema, basta `python -m uvicorn app.main:app` (como no [Início rápido](#início-rápido)).
 
 | Recurso | Endereço |
 |---|---|
